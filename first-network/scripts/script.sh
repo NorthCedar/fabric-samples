@@ -29,10 +29,8 @@ CC_SRC_PATH="github.com/chaincode/chaincode_example02/go/"
 if [ "$LANGUAGE" = "node" ]; then
 	CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/node/"
 fi
-
-if [ "$LANGUAGE" = "java" ]; then
-	CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/java/"
-fi
+INIT_ARGS='{"Args":[]}'
+CCNAME="p1"
 
 echo "Channel name : "$CHANNEL_NAME
 
@@ -87,31 +85,32 @@ updateAnchorPeers 0 2
 if [ "${NO_CHAINCODE}" != "true" ]; then
 
 	## Install chaincode on peer0.org1 and peer0.org2
-	echo "Installing chaincode on peer0.org1..."
+	echo "Installing chaincode $CCNAME on peer0.org1..."
 	installChaincode 0 1
 	echo "Install chaincode on peer0.org2..."
 	installChaincode 0 2
+	echo "Installing chaincode on peer1.org2..."
+	installChaincode 1 2
 
 	# Instantiate chaincode on peer0.org2
 	echo "Instantiating chaincode on peer0.org2..."
 	instantiateChaincode 0 2
+	instantiateChaincode 0 1
 
-	# Query chaincode on peer0.org1
-	echo "Querying chaincode on peer0.org1..."
-	chaincodeQuery 0 1 100
-
-	# Invoke chaincode on peer0.org1 and peer0.org2
-	echo "Sending invoke transaction on peer0.org1 peer0.org2..."
-	chaincodeInvoke 0 1 0 2
-	
-	## Install chaincode on peer1.org2
+  INIT_ARGS='{"Args":["init","a","900","b","200"]}'
+  CCNAME="b1"
+  CC_SRC_PATH="github.com/chaincode/chaincode_example03/go/"
+  echo "Installing chaincode $CCNAME on peer0.org1..."
+	installChaincode 0 1
+	echo "Install chaincode on peer0.org2..."
+	installChaincode 0 2
 	echo "Installing chaincode on peer1.org2..."
 	installChaincode 1 2
 
-	# Query on chaincode on peer1.org2, check if the result is 90
-	echo "Querying chaincode on peer1.org2..."
-	chaincodeQuery 1 2 90
-	
+	# Instantiate chaincode on peer0.org2
+	echo "Instantiating chaincode on peer0.org2..."
+	instantiateChaincode 0 2
+	instantiateChaincode 0 1
 fi
 
 echo

@@ -92,7 +92,15 @@ function askProceed() {
 # Obtain CONTAINER_IDS and remove them
 # TODO Might want to make this optional - could clear other containers
 function clearContainers() {
-  CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*/) {print $1}')
+  CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*.-p.*/) {print $1}')
+  if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
+    echo "---- No containers available for deletion ----"
+  else
+    docker rm -f $CONTAINER_IDS
+  fi
+}
+function clearContainers2() {
+  CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*.-b.*/) {print $1}')
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
     echo "---- No containers available for deletion ----"
   else
@@ -104,7 +112,15 @@ function clearContainers() {
 # specifically the following images are often left behind:
 # TODO list generated image naming patterns
 function removeUnwantedImages() {
-  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /dev-peer.*/) {print $3}')
+  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /dev-peer.*.-p.*/) {print $3}')
+  if [ -z "$DOCKER_IMAGE_IDS" -o "$DOCKER_IMAGE_IDS" == " " ]; then
+    echo "---- No images available for deletion ----"
+  else
+    docker rmi -f $DOCKER_IMAGE_IDS
+  fi
+}
+function removeUnwantedImages2() {
+  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /dev-peer.*.-b.*/) {print $3}')
   if [ -z "$DOCKER_IMAGE_IDS" -o "$DOCKER_IMAGE_IDS" == " " ]; then
     echo "---- No images available for deletion ----"
   else
@@ -154,6 +170,7 @@ function networkUp() {
   checkPrereqs
   # generate artifacts if they don't exist
   if [ ! -d "crypto-config" ]; then
+    echo "generate first"
     generateCerts
     replacePrivateKey
     generateChannelArtifacts
@@ -284,8 +301,10 @@ function networkDown() {
     docker run -v $PWD:/tmp/first-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/first-network/ledgers-backup
     #Cleanup the chaincode containers
     clearContainers
+    clearContainers2
     #Cleanup images
     removeUnwantedImages
+    removeUnwantedImages2
     # remove orderer block and other channel configuration transactions and certs
     rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
     # remove the docker-compose yaml file that was customized to the example
@@ -587,7 +606,7 @@ else
   echo "${EXPMODE} for channel '${CHANNEL_NAME}' with CLI timeout of '${CLI_TIMEOUT}' seconds and CLI delay of '${CLI_DELAY}' seconds"
 fi
 # ask for confirmation to proceed
-askProceed
+#askProceed
 
 #Create the network using docker compose
 if [ "${MODE}" == "up" ]; then
