@@ -87,15 +87,15 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	## Install chaincode on peer0.org1 and peer0.org2
 	echo "Installing chaincode $CCNAME on peer0.org1..."
 	installChaincode 0 1
-	echo "Install chaincode on peer0.org2..."
+	echo "Install chaincode $CCNAME on peer0.org2..."
 	installChaincode 0 2
-	echo "Installing chaincode on peer1.org2..."
-	installChaincode 1 2
+	#echo "Installing chaincode on peer1.org2..."
+	#installChaincode 1 2
 
 	# Instantiate chaincode on peer0.org2
 	echo "Instantiating chaincode on peer0.org2..."
 	instantiateChaincode 0 2
-	instantiateChaincode 0 1
+	#instantiateChaincode 0 1
 
   INIT_ARGS='{"Args":["init","a","900","b","200"]}'
   CCNAME="b1"
@@ -104,13 +104,13 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	installChaincode 0 1
 	echo "Install chaincode on peer0.org2..."
 	installChaincode 0 2
-	echo "Installing chaincode on peer1.org2..."
-	installChaincode 1 2
+	#echo "Installing chaincode on peer1.org2..."
+	#installChaincode 1 2
 
 	# Instantiate chaincode on peer0.org2
 	echo "Instantiating chaincode on peer0.org2..."
 	instantiateChaincode 0 2
-	instantiateChaincode 0 1
+	#instantiateChaincode 0 1
 fi
 
 echo
